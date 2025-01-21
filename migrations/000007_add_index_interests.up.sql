@@ -1,0 +1,1 @@
+CREATE INDEX idx_interests_id ON interests(id);

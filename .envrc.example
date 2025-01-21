@@ -1,0 +1,9 @@
+# Example of environment variables to run the webserver
+# Copy this file and name it .envrc
+# Then modify the variables to match your environment
+
+export DB_HOST='localhost'
+export DB_PORT=5432
+export DB_NAME='database'
+export DB_USERNAME='user'
+export DB_PASSWORD='password'

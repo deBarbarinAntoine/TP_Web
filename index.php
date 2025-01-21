@@ -1,10 +1,19 @@
 <?php
-include('utils.php');
-$pageTitle = 'Index';
-include('sessions.php');
-include('header.php');
+// Main landing page with user connection-specific content
 
-if ($connected) {
+// Set page variables
+$pageTitle = 'Index';
+
+// Utility functions such as redirection and password handling
+include_once('includes/utils.php');
+
+// Session management to check user connection status
+include_once('includes/sessions.php');
+
+// Header of the webpage with common elements
+include_once('includes/header.php');
+
+if ($isConnected) {
     $message = "Hello " . $username . "!";
 } else {
     $message = "Hey visitor!";
@@ -13,7 +22,7 @@ if ($connected) {
 
 <h1><?php echo $message; ?></h1>
 
-<?php if ($connected) { ?>
+<?php if ($isConnected) { ?>
 
     <a href="home.php">Home</a>
     <form method="post" action="logout.php">

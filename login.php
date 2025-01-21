@@ -1,45 +1,67 @@
 <?php
-include('utils.php');
+// Login page for user authentication and session handling
+
+include_once('models/user.php');
+use models\User;
+
+// Set page variables
 $pageTitle = 'Login';
-include('sessions.php');
-include('header.php');
+$errors = [];
 
-if (isset($_POST['username'])) {
-    $username = $_POST['username'];
-    $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
-    if (empty($username)) {
-        $error = 'A valid username is required';
-    }
-    if (strlen($username) < 3 || strlen($username) > 16) {
-        $error = 'A valid username is required';
-    }
-    $username = stripslashes($username);
+// Utility functions such as redirection and password handling
+include_once('includes/utils.php');
 
-    if (!isset($error)) {
-        session_start();
-        $_SESSION['username'] = $username;
-        redirect('index.php');
+// Session management to check user connection status
+include_once('includes/sessions.php');
+
+// Header of the webpage with common elements
+include_once('includes/header.php');
+
+unauthenticatedGuard($isConnected);
+
+if (isset($_POST['email'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    if (!checkEmail($email)) {
+        $errors['email'] = "Invalid email format!";
+    }
+
+    if (!empty($errors)) {
+
+        $user = User::login($email, $password);
+
+        if (isset($user)) {
+            logout();
+            session_start();
+
+            $_SESSION['id'] = $user->getId();
+            $_SESSION['email'] = $email;
+            $_SESSION['username'] = $user->getUsername();
+
+            redirect('index.php');
+        }
+
+        $errors['credentials'] = "Invalid email or password!";
     }
 }
+?>
 
-if ($connected) { ?>
+<form method="POST" action="login.php">
+    <label for="email">Email</label>
+    <input type="email" name="email" placeholder="Email" id="email" required autofocus>
+    <?php formError($errors, 'email'); ?>
 
-    <p>Hey <?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?>, you're already logged in!</p>
-    <a href="home.php">Home</a>
-    <a href="index.php">Index</a>
+    <label for="password">Password</label>
+    <input type="password" name="password" placeholder="Password" id="password" required>
+    <?php formError($errors, 'credentials'); ?>
 
-    <?php } else { ?>
+    <button type="submit">Login</button>
+</form>
 
-    <form method="POST" action="login.php">
-        <label for="username">Username</label>
-        <input type="text" name="username" placeholder="Username" id="username" required>
+<p>You don't have an account yet?</p>
+<a href="/register.php">Register</a>
 
-        <?php if(isset($error)){ ?>
-            <p><?php echo $error; ?></p>
-        <?php } ?>
+<a href="index.php">Return</a>
 
-        <button type="submit">Submit</button>
-    </form>
-    <a href="index.php">Return</a>
-
-<?php } include('footer.php'); ?>
+<?php include('includes/footer.php'); ?>

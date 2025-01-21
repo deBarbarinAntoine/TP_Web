@@ -10,3 +10,5 @@
     <h2>adebarbarin php website</h2>
 </header>
 <main>
+
+<?php pushMessage(); ?>
