@@ -23,15 +23,22 @@ if (isset($_POST['email'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
+    // DEBUG
+    print($email . ' tried to login.');
+
     if (!checkEmail($email)) {
         $errors['email'] = "Invalid email format!";
     }
 
-    if (!empty($errors)) {
+    if (empty($errors)) {
 
         $user = User::login($email, $password);
 
         if (isset($user)) {
+
+            // DEBUG
+            print('login successful');
+
             logout();
             session_start();
 
@@ -40,6 +47,10 @@ if (isset($_POST['email'])) {
             $_SESSION['username'] = $user->getUsername();
 
             redirect('index.php');
+        } else {
+
+            // DEBUG
+            print('a problem occurred');
         }
 
         $errors['credentials'] = "Invalid email or password!";

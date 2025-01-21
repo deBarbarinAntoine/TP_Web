@@ -28,6 +28,8 @@ if (isset($_POST['username'])) {
     $password = $_POST['password'];
     $confirmPassword = $_POST['confirm-password'];
 
+    // DEBUG
+    print($username . ' tried to create an account.');
 
     // Validate the username and add an error message if it is invalid
     if (!checkUsername($username)) {
@@ -43,6 +45,7 @@ if (isset($_POST['username'])) {
     }
 
     if (empty($errors)) {
+        print($username . ' created.');
         // Attempt to create a new user account. If successful, redirect to the login page.
         $user = User::new($username, $email, $password);
         if (isset($user)) {

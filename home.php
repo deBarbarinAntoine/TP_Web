@@ -24,6 +24,6 @@ authenticatedGuard($isConnected);
 <?php
 
 // Footer of the webpage with common elements
-include "footer.php";
+include('includes/footer.php');
 
 ?>

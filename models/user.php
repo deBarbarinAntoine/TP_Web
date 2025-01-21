@@ -300,6 +300,8 @@ class User
 
         } catch (Exception $e) {
             // TODO -> implement logging
+            // DEBUG
+            print($e->getMessage());
             return false;
         }
     }
@@ -438,18 +440,37 @@ class User
                 WHERE email = :email;
                 ';
 
+        // DEBUG
+        print('email: ' . $email);
+
         $results = executeQuery($sql, ['email' => $email]);
 
+        // DEBUG
+        print_r('results: ' . $results);
+
         if (empty($results)) {
+
+            // DEBUG
+            print('No results found.');
+
             return null;
         }
 
+        $id = $results[0]['id'];
+
+        // DEBUG
+        print('Id: ' . $id);
+
         if (verifyPassword($password, $results[0]['password_hash'])) {
             try {
-                $user = User::get($results[0]['id']);
+                $user = User::get($id);
+                // DEBUG
+                print_r($user);
                 return $user;
             } catch (Exception $e) {
                 // TODO -> implement logging
+                // DEBUG
+                print($e->getMessage());
                 return null;
             }
         }
