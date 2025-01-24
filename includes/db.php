@@ -40,9 +40,15 @@ function executeQuery(string $sql, array $params = []): int|array|null
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    if (str_starts_with($sql, 'SELECT')) {
-        return $stmt->fetchAll();
-    } elseif (str_starts_with($sql, 'INSERT') || str_starts_with($sql, 'UPDATE') || str_starts_with($sql, 'DELETE')) {
+    // DEBUG
+//    print_r($stmt->errorInfo());
+//    print_r($stmt->rowCount());
+
+    $result = $stmt->fetchAll();
+
+    if (str_contains($sql, 'SELECT')) {
+        return $result;
+    } elseif (str_contains($sql, 'INSERT') || str_contains($sql, 'UPDATE') || str_contains($sql, 'DELETE')) {
         return $stmt->rowCount();
     }
     return null;

@@ -372,12 +372,16 @@ class User
         $sql = '
         SELECT u.id, u.username, u.email, u.avatar, u.created_at, u.updated_at, i.id AS interest_id, i.name AS interest_name
         FROM users u 
-        LEFT JOIN users_interests ui ON u.id = ui.user_id
-        LEFT JOIN interests i ON ui.interest_id = i.id
-        WHERE u.id = :id;
+        LEFT JOIN users_interests ui ON u.id = ui.id_user
+        LEFT JOIN interests i ON ui.id_interest = i.id
+        WHERE u.id = :id
     ';
 
         $results = executeQuery($sql, ['id' => $id]);
+
+        // DEBUG
+//        print('Get user results:<br>');
+//        print_r($results);
 
         if (empty($results)) {
             return null;
@@ -434,19 +438,19 @@ class User
      */
     public static function login(string $email, string $password): ?User
     {
-        $sql = '
-                SELECT id, password_hash, email
+        $sql = "
+                SELECT id, email, username, encode(decode(encode(password_hash ,'escape'),'base64'),'escape') AS password_hash
                 FROM users
-                WHERE email = :email;
-                ';
+                WHERE email = :email
+                ";
 
         // DEBUG
-        print('email: ' . $email);
+//        print('email: ' . $email);
 
         $results = executeQuery($sql, ['email' => $email]);
 
         // DEBUG
-        print_r('results: ' . $results);
+//        print_r($results);
 
         if (empty($results)) {
 
@@ -459,7 +463,9 @@ class User
         $id = $results[0]['id'];
 
         // DEBUG
-        print('Id: ' . $id);
+//        print('Id: ' . $id);
+//        print('Password: ' . $results['password_hash']);
+//        print('Password is a ' . gettype($results['password_hash']));
 
         if (verifyPassword($password, $results[0]['password_hash'])) {
             try {

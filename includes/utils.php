@@ -63,6 +63,7 @@ function hashPassword(string $password): string
  */
 function verifyPassword(string $password, string $hash): bool
 {
+//    $hash = base64_decode($hash);
     return password_verify($password, $hash);
 }
 

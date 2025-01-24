@@ -16,6 +16,7 @@ include_once('includes/header.php');
 authenticatedGuard($isConnected);
 
 // Content visible only to connected (logged-in) users
+include('includes/user_info.php');
 ?>
 
     <p>Hey, still there <?php echo $username; ?>?</p>

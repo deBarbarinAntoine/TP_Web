@@ -23,8 +23,11 @@ if (isset($_POST['email'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
+    $email = trim($email);
+    $password = trim($password);
+
     // DEBUG
-    print($email . ' tried to login.');
+//    print($email . ' tried to login.');
 
     if (!checkEmail($email)) {
         $errors['email'] = "Invalid email format!";
@@ -32,15 +35,20 @@ if (isset($_POST['email'])) {
 
     if (empty($errors)) {
 
+        // DEBUG
+        $exists = User::exists($email);
+//        if ($exists) {
+//            print($email . ' exists.');
+//        } else {
+//            print($email . ' does not exist.');
+//        }
+
         $user = User::login($email, $password);
 
         if (isset($user)) {
 
             // DEBUG
-            print('login successful');
-
-            logout();
-            session_start();
+//            print('login successful');
 
             $_SESSION['id'] = $user->getId();
             $_SESSION['email'] = $email;
@@ -50,7 +58,7 @@ if (isset($_POST['email'])) {
         } else {
 
             // DEBUG
-            print('a problem occurred');
+//            print('a problem occurred');
         }
 
         $errors['credentials'] = "Invalid email or password!";
