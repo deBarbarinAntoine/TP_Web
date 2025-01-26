@@ -4,8 +4,10 @@ namespace models;
 
     use DateTime;
     use Exception;
-    require_once('includes/utils.php');
-    require_once('includes/db.php');
+    use PDO;
+
+    require_once(dirname(__FILE__).'/../includes/utils.php');
+    require_once(dirname(__FILE__).'/../includes/db.php');
 
 
 /**
@@ -290,10 +292,10 @@ class User
             $rowCount = executeQuery(
                 $sql,
                 [
-                    'username' => $this->username,
-                    'email' => $this->email,
-                    'avatar' => $this->avatar,
-                    'password_hash' => $this->password_hash
+                    'username' => [ $this->username => PDO::PARAM_STR ],
+                    'email' => [ $this->email => PDO::PARAM_STR ],
+                    'avatar' => [ $this->avatar => PDO::PARAM_STR ],
+                    'password_hash' => [ $this->password_hash => PDO::PARAM_STR ]
                 ]
             );
             return $rowCount > 0;
@@ -316,18 +318,18 @@ class User
         $sql = '
                     UPDATE users
                     SET username = :username, email = :email, avatar = :avatar, password_hash = :password_hash
-                    WHERE id = :id;
+                    WHERE id = :id
                     ';
 
         try {
             $rowCount = executeQuery(
                 $sql,
                 [
-                    'id' => $this->id,
-                    'username' => $this->username,
-                    'email' => $this->email,
-                    'avatar' => $this->avatar,
-                    'password_hash' => $this->password_hash
+                    'id' => [ $this->id => PDO::PARAM_INT ],
+                    'username' => [ $this->username => PDO::PARAM_STR ],
+                    'email' => [ $this->email => PDO::PARAM_STR ],
+                    'avatar' => [ $this->avatar => PDO::PARAM_STR ],
+                    'password_hash' => [ $this->password_hash => PDO::PARAM_STR ]
                 ]
             );
             return $rowCount > 0;
@@ -351,7 +353,7 @@ class User
                     ';
 
         try {
-            $rowCount = executeQuery($sql, ['id' => $id]);
+            $rowCount = executeQuery($sql, [ 'id' => [ $id => PDO::PARAM_INT ]]);
             return $rowCount > 0;
 
         } catch (Exception $e) {
@@ -377,7 +379,7 @@ class User
         WHERE u.id = :id
     ';
 
-        $results = executeQuery($sql, ['id' => $id]);
+        $results = executeQuery($sql, [ 'id' => [ $id => PDO::PARAM_INT ]]);
 
         // DEBUG
 //        print('Get user results:<br>');
@@ -417,20 +419,22 @@ class User
     public static function exists(string $email): bool
     {
         $sql = '
-                SELECT id
-                FROM users
-                WHERE email = :email;
+                SELECT EXISTS(SELECT 1 FROM users WHERE email = :email) exists
                 ';
-        $results = executeQuery($sql, ['email' => $email]);
-        if (empty($results)) {
-            return false;
-        }
+        $results = executeQuery($sql, [ 'email' => [ $email => PDO::PARAM_STR ]], false);
 
-        return true;
+        return $results['exists'];
     }
+
 
     /**
      * Authenticates a user by their email and password.
+     *
+     * This function verifies if the provided email exists in the database and
+     * performs password verification using the supplied plain text password.
+     * If authentication succeeds, the corresponding User object is fetched
+     * and returned. In case of failure (e.g., incorrect credentials or errors during
+     * the fetch process), null is returned.
      *
      * @param string $email The user's email address.
      * @param string $password The plain text password for verification.
@@ -438,49 +442,46 @@ class User
      */
     public static function login(string $email, string $password): ?User
     {
+        // Fetch the user's id and hashed password from the database based on the provided email
         $sql = "
-                SELECT id, email, username, encode(decode(encode(password_hash ,'escape'),'base64'),'escape') AS password_hash
+                SELECT id, encode(decode(encode(password_hash ,'escape'),'base64'),'escape') AS password_hash
                 FROM users
                 WHERE email = :email
                 ";
 
-        // DEBUG
-//        print('email: ' . $email);
+        $results = executeQuery($sql, ['email' => [$email => PDO::PARAM_STR]], false);
 
-        $results = executeQuery($sql, ['email' => $email]);
-
-        // DEBUG
-//        print_r($results);
-
+        // If no matching email is found, return null, signaling authentication failure
         if (empty($results)) {
 
-            // DEBUG
-            print('No results found.');
+            // DEBUG: Log or display when no user matches the provided email
+            // print('No results found.');
 
             return null;
         }
 
-        $id = $results[0]['id'];
+        $id = $results['id'];
 
-        // DEBUG
-//        print('Id: ' . $id);
-//        print('Password: ' . $results['password_hash']);
-//        print('Password is a ' . gettype($results['password_hash']));
-
-        if (verifyPassword($password, $results[0]['password_hash'])) {
+        // Validate the supplied password against the hashed password
+        if (verifyPassword($password, $results['password_hash'])) {
             try {
+                // Fetch and return the User object on successful password validation
                 $user = User::get($id);
-                // DEBUG
-                print_r($user);
+
+                // DEBUG: Print user details (for development/testing purposes)
+                // print_r($user);
                 return $user;
             } catch (Exception $e) {
-                // TODO -> implement logging
-                // DEBUG
+                // Handle unexpected errors during the User fetch process, e.g., database issues
+
+                // TODO -> implement logging for the caught exception
+
+                // DEBUG: Display the error message
                 print($e->getMessage());
-                return null;
             }
         }
 
+        // If password verification fails, authentication is unsuccessful
         return null;
     }
 

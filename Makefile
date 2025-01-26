@@ -25,13 +25,13 @@ confirm:
 .PHONY: run
 run: 
 	@DB_PASSWORD='${DB_PASSWORD}' DB_HOST='${DB_HOST}' DB_PORT='${DB_PORT}' DB_NAME='${DB_NAME}' DB_USERNAME='${DB_USERNAME}'\
- 		php -S localhost:3030
+ 		php -S 10.100.10.10:3030
 	
 
 ## db/psql: Connect to the database
 .PHONY: db/psql
 db/psql: 
-	@psql ${$DB_DSN}
+	@psql ${DB_DSN}
 	
 
 ## db/migrations/new: Create a new migration file for ${name}

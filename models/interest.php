@@ -5,7 +5,7 @@ namespace models;
     use DateTime;
     use Exception;
 
-    require_once('includes/db.php');
+    require_once(dirname(__FILE__).'/../includes/db.php');
 
     /**
  * Represents an interest with a unique identifier, name, timestamps for creation and last update,
